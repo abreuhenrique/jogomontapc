@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Montagem de Computadores</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <h1>💻 Montagem de Computadores - Arraste e Solte</h1>
+    <p class="instrucoes">📦 Arraste as peças para seus slots no gabinete.<br> Clique na peça para saber sua função.</p>
+
+    <div class="container">
+        <div class="peças">
+            <h2>Peças</h2>
+            <div class="item" id="placa-mae" draggable="true">Placa-Mãe</div>
+            <div class="item" id="processador" draggable="true">Processador (CPU)</div>
+            <div class="item" id="memoria-ram" draggable="true">Memória RAM</div>
+            <div class="item" id="hd" draggable="true">HD / SSD</div>
+            <div class="item" id="fonte" draggable="true">Fonte</div>
+            <div class="item" id="placa-video" draggable="true">Placa de Vídeo</div>
+        </div>
+
+        <div class="gabinete">
+            <h2>Gabinete (Bancada)</h2>
+
+            <div class="slot" data-accept="placa-mae" id="slot-placa-mae">
+                Slot Placa-Mãe
+                <div class="subslots" id="subslots-placa-mae" style="display: none;">
+                    <div class="slot" data-accept="processador" id="slot-cpu">Slot CPU</div>
+                    <div class="slot" data-accept="memoria-ram" id="slot-ram">Slot Memória RAM</div>
+                </div>
+            </div>
+
+            <div class="slot" data-accept="hd" id="slot-hd">Slot HD / SSD</div>
+            <div class="slot" data-accept="fonte" id="slot-fonte">Slot Fonte</div>
+            <div class="slot" data-accept="placa-video" id="slot-video">Slot Placa de Vídeo</div>
+        </div>
+    </div>
+
+    <div class="info" id="info">
+        ℹ️ Clique em uma peça para saber sua função.
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
