@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PC Builder Academy - Versão Alfa</title>
+    <title>PC Builder</title>
     <style>
         :root {
             --primary: #3498db;
@@ -12,6 +12,7 @@
             --success: #2ecc71;
             --bg: #ecf0f1;
             --card-bg: #ffffff;
+            --text: #333;
         }
 
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -20,6 +21,7 @@
             margin: 0;
             padding: 0;
             background-color: var(--bg);
+            color: var(--text);
             display: flex;
             flex-direction: column;
             min-height: 100vh;
@@ -30,19 +32,79 @@
             color: white;
             padding: 1rem;
             text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
 
-        .game-container {
+        /* --- UTILITÁRIOS --- */
+        .hidden { display: none !important; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; width: 100%; }
+
+        /* --- TELA DE TUTORIAL --- */
+        .tutorial-section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .tutorial-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .info-card {
+            border-left: 5px solid var(--primary);
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+        }
+
+        .info-card h4 { margin: 0 0 10px 0; color: var(--secondary); display: flex; align-items: center; gap: 10px; }
+        .info-card p { margin: 0; font-size: 0.95rem; line-height: 1.5; color: #555; }
+
+        .compat-rules {
+            margin-top: 30px;
+            background: #e8f6f3;
+            border: 2px solid var(--success);
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .compat-rules h3 { color: #27ae60; margin-top: 0; }
+        .compat-rules ul { list-style: none; padding: 0; }
+        .compat-rules li { margin-bottom: 10px; padding-left: 25px; position: relative; }
+        .compat-rules li::before { content: '✅'; position: absolute; left: 0; top: 0; }
+
+        .start-btn {
+            display: block;
+            width: 100%;
+            max-width: 300px;
+            margin: 30px auto 0;
+            padding: 15px;
+            font-size: 1.3rem;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+        .start-btn:hover { background-color: #2980b9; transform: scale(1.05); }
+
+        /* --- TELA DO JOGO (CSS Anterior) --- */
+        .game-wrapper {
             display: flex;
             flex-wrap: wrap;
-            padding: 20px;
             gap: 20px;
-            flex: 1;
             justify-content: center;
         }
 
-        /* Área de Seleção de Peças */
-        .parts-panel {
+        .parts-panel, .build-area {
             flex: 1;
             min-width: 300px;
             background: var(--card-bg);
@@ -51,180 +113,72 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
-        .category-tabs {
-            display: flex;
-            gap: 5px;
-            margin-bottom: 15px;
-            overflow-x: auto;
-            padding-bottom: 5px;
-        }
+        .category-tabs { display: flex; gap: 5px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px; }
+        .tab-btn { padding: 8px 12px; border: none; background: #ddd; cursor: pointer; border-radius: 5px; font-weight: bold; }
+        .tab-btn.active { background-color: var(--primary); color: white; }
 
-        .tab-btn {
-            padding: 8px 12px;
-            border: none;
-            background: #ddd;
-            cursor: pointer;
-            border-radius: 5px;
-            font-weight: bold;
-            font-size: 0.9rem;
-        }
-
-        .tab-btn.active {
-            background-color: var(--primary);
-            color: white;
-        }
-
-        .parts-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-            gap: 10px;
-        }
-
+        .parts-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
+        
         .part-card {
-            border: 2px solid #ddd;
-            padding: 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            text-align: center;
-            transition: transform 0.2s;
-            position: relative;
+            border: 2px solid #ddd; padding: 10px; border-radius: 8px; cursor: pointer;
+            text-align: center; transition: transform 0.2s; position: relative;
         }
-
-        .part-card:hover {
-            transform: translateY(-3px);
-            border-color: var(--primary);
-        }
-
-        .part-icon {
-            font-size: 2rem;
-            margin-bottom: 5px;
-            display: block;
-        }
-
+        .part-card:hover { transform: translateY(-3px); border-color: var(--primary); }
+        .part-icon { font-size: 2rem; display: block; margin-bottom: 5px; }
+        
         .part-info-btn {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background: #95a5a6;
-            color: white;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            font-size: 12px;
-            border: none;
-            cursor: help;
-        }
-
-        /* Área de Montagem (O Computador) */
-        .build-area {
-            flex: 1;
-            min-width: 300px;
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            position: absolute; top: 5px; right: 5px; background: #95a5a6; color: white;
+            border-radius: 50%; width: 20px; height: 20px; font-size: 12px; border: none; cursor: help;
         }
 
         .pc-case {
-            width: 100%;
-            max-width: 400px;
-            height: 500px;
-            background-color: #333;
-            border-radius: 15px;
-            position: relative;
-            padding: 20px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-template-rows: repeat(4, 1fr);
-            gap: 10px;
-            border: 4px solid #555;
+            width: 100%; max-width: 400px; height: 500px; background-color: #333; border-radius: 15px;
+            position: relative; padding: 20px; display: grid; grid-template-columns: 1fr 1fr;
+            grid-template-rows: repeat(4, 1fr); gap: 10px; border: 4px solid #555; margin: 0 auto;
         }
 
         .slot {
-            background: rgba(255,255,255,0.1);
-            border: 2px dashed #777;
-            border-radius: 5px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: #aaa;
-            font-size: 0.8rem;
-            text-align: center;
-            position: relative;
+            background: rgba(255,255,255,0.1); border: 2px dashed #777; border-radius: 5px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: #aaa; font-size: 0.8rem; text-align: center; cursor: pointer;
         }
+        .slot.filled { background: rgba(46, 204, 113, 0.2); border: 2px solid var(--success); color: white; }
 
-        .slot.filled {
-            background: rgba(46, 204, 113, 0.2);
-            border: 2px solid var(--success);
-            color: white;
-        }
-
+        /* Posicionamento dos slots */
         .slot-cpu { grid-column: 1 / 2; grid-row: 1 / 2; }
-        .slot-mobo { grid-column: 1 / 3; grid-row: 1 / 4; z-index: 0; opacity: 0.5; border: none; } /* Background visual */
+        .slot-mobo { grid-column: 1 / 3; grid-row: 1 / 4; z-index: 0; opacity: 0.5; border: none; pointer-events: none; }
         .slot-ram { grid-column: 2 / 3; grid-row: 1 / 2; }
         .slot-gpu { grid-column: 1 / 3; grid-row: 2 / 3; }
         .slot-storage { grid-column: 2 / 3; grid-row: 3 / 4; }
         .slot-psu { grid-column: 1 / 3; grid-row: 4 / 5; }
 
         .validate-btn {
-            margin-top: 20px;
-            padding: 15px 30px;
-            background-color: var(--success);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 1.2rem;
-            cursor: pointer;
-            width: 100%;
+            margin-top: 20px; padding: 15px; background-color: var(--success); color: white;
+            border: none; border-radius: 5px; font-size: 1.2rem; cursor: pointer; width: 100%;
         }
-
         .validate-btn:hover { background-color: #27ae60; }
 
-        /* Modal de Feedback */
+        /* Modal */
         .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7);
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); justify-content: center; align-items: center; z-index: 100;
         }
-        .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            max-width: 500px;
-            text-align: center;
-        }
+        .modal-content { background: white; padding: 30px; border-radius: 10px; max-width: 500px; text-align: center; }
         .status-icon { font-size: 4rem; display: block; margin-bottom: 20px; }
         .close-modal {
-            margin-top: 20px;
-            padding: 10px 20px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
+            margin-top: 20px; padding: 10px 20px; background: var(--primary); color: white;
+            border: none; border-radius: 5px; cursor: pointer;
         }
 
-        /* Tooltip educacional */
         .info-panel {
-            margin-top: 10px;
-            padding: 10px;
-            background: #fff3cd;
-            border: 1px solid #ffeeba;
-            border-radius: 5px;
-            font-size: 0.9rem;
-            display: none;
+            margin-top: 10px; padding: 10px; background: #fff3cd; border: 1px solid #ffeeba;
+            border-radius: 5px; font-size: 0.9rem; display: none;
         }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         @media (max-width: 768px) {
-            .game-container { flex-direction: column; }
+            .game-wrapper { flex-direction: column; }
             .pc-case { height: auto; min-height: 400px; }
         }
     </style>
@@ -232,34 +186,77 @@
 <body>
 
 <header>
-    <h1>🖥️ PC Builder Academy</h1>
-    <p>Monte o computador ideal e aprenda sobre compatibilidade!</p>
+    <h1>🖥️ PC Builder</h1>
 </header>
 
-<div class="game-container">
-    <div class="parts-panel">
-        <h3>Loja de Peças</h3>
-        <div class="category-tabs" id="categoryTabs">
+<div class="container">
+    
+    <div id="tutorial-screen" class="tutorial-section">
+        <h2>📚 Guia do Construtor Iniciante</h2>
+        <p>Antes de montar sua máquina, entenda a função de cada peça e como elas conversam entre si.</p>
+
+        <div class="tutorial-grid">
+            <div class="info-card">
+                <h4>🎛️ Placa-Mãe (Motherboard)</h4>
+                <p>É a base de tudo. Ela conecta todas as peças. <strong>Importante:</strong> Ela define qual processador e memória você pode usar.</p>
             </div>
-        
-        <div id="infoPanel" class="info-panel">Selecione uma categoria para ver as peças.</div>
-        
-        <div class="parts-list" id="partsList">
+            <div class="info-card">
+                <h4>🧠 Processador (CPU)</h4>
+                <p>O cérebro do computador. Realiza os cálculos. Ele precisa encaixar fisicamente no <strong>Soquete</strong> da placa-mãe.</p>
             </div>
+            <div class="info-card">
+                <h4>💾 Memória RAM</h4>
+                <p>A mesa de trabalho temporária. Mais RAM = mais programas abertos ao mesmo tempo. Deve ser do tipo correto (Ex: <strong>DDR4</strong>).</p>
+            </div>
+            <div class="info-card">
+                <h4>📺 Placa de Vídeo (GPU)</h4>
+                <p>Responsável por desenhar as imagens na tela. Essencial para jogos e edição de vídeo.</p>
+            </div>
+            <div class="info-card">
+                <h4>⚡ Fonte de Alimentação (PSU)</h4>
+                <p>Fornece energia. A potência (Watts) deve ser maior que a soma do consumo de todas as peças.</p>
+            </div>
+            <div class="info-card">
+                <h4>💿 Armazenamento (SSD/HD)</h4>
+                <p>Onde seus arquivos (fotos, jogos, sistema) ficam salvos para sempre.</p>
+            </div>
+        </div>
+
+        <div class="compat-rules">
+            <h3>⚠️ Regras de Compatibilidade</h3>
+            <ul>
+                <li><strong>CPU x Placa-Mãe:</strong> O tipo de encaixe (Soquete) deve ser IDÊNTICO. (Ex: <em>LGA1200</em> com <em>LGA1200</em>).</li>
+                <li><strong>RAM x Placa-Mãe:</strong> A geração da memória deve ser suportada pela placa. (Ex: <em>DDR4</em> só funciona em slots <em>DDR4</em>).</li>
+                <li><strong>Fonte x Todo o resto:</strong> Se a conta de energia das peças der 350W, sua fonte precisa ter, no mínimo, 400W ou mais.</li>
+            </ul>
+        </div>
+
+        <button class="start-btn" onclick="startGame()">🛠️ Iniciar Montagem</button>
     </div>
 
-    <div class="build-area">
-        <h3>Seu Gabinete</h3>
-        <div class="pc-case">
-            <div class="slot slot-mobo" id="slot-mobo">Placa-Mãe (Fundo)</div>
-            <div class="slot slot-cpu" id="slot-cpu" onclick="removePart('cpu')">CPU</div>
-            <div class="slot slot-ram" id="slot-ram" onclick="removePart('ram')">RAM</div>
-            <div class="slot slot-gpu" id="slot-gpu" onclick="removePart('gpu')">Placa de Vídeo</div>
-            <div class="slot slot-storage" id="slot-storage" onclick="removePart('storage')">Armazenamento</div>
-            <div class="slot slot-psu" id="slot-psu" onclick="removePart('psu')">Fonte (PSU)</div>
+    <div id="game-screen" class="game-wrapper hidden">
+        <div class="parts-panel">
+            <h3>Loja de Peças</h3>
+            <div class="category-tabs" id="categoryTabs"></div>
+            <div id="infoPanel" class="info-panel"></div>
+            <div class="parts-list" id="partsList"></div>
         </div>
-        <button class="validate-btn" onclick="validateBuild()">Ligar Computador</button>
+
+        <div class="build-area">
+            <h3>Bancada de Montagem</h3>
+            <div class="pc-case">
+                <div class="slot slot-mobo" id="slot-mobo">Placa-Mãe (Fundo)</div>
+                <div class="slot slot-cpu" id="slot-cpu" onclick="removePart('cpu')">CPU</div>
+                <div class="slot slot-ram" id="slot-ram" onclick="removePart('ram')">RAM</div>
+                <div class="slot slot-gpu" id="slot-gpu" onclick="removePart('gpu')">Placa de Vídeo</div>
+                <div class="slot slot-storage" id="slot-storage" onclick="removePart('storage')">Armazenamento</div>
+                <div class="slot slot-psu" id="slot-psu" onclick="removePart('psu')">Fonte (PSU)</div>
+            </div>
+            <button class="validate-btn" onclick="validateBuild()">🔌 Ligar Computador</button>
+            <p style="text-align:center; margin-top:10px; cursor:pointer; color: var(--primary);" onclick="showTutorial()">↩ Voltar ao Tutorial</p>
+        </div>
     </div>
+
 </div>
 
 <div id="feedbackModal" class="modal">
@@ -267,67 +264,62 @@
         <span id="modalIcon" class="status-icon"></span>
         <h2 id="modalTitle"></h2>
         <p id="modalMessage"></p>
-        <button class="close-modal" onclick="closeModal()">Tentar Novamente</button>
+        <button class="close-modal" onclick="closeModal()">Entendido</button>
     </div>
 </div>
 
 <script>
-    // --- BANCO DE DADOS DE PEÇAS (SIMULADO) ---
+    // --- LÓGICA DE NAVEGAÇÃO ---
+    function startGame() {
+        document.getElementById('tutorial-screen').classList.add('hidden');
+        document.getElementById('game-screen').classList.remove('hidden');
+    }
+
+    function showTutorial() {
+        document.getElementById('game-screen').classList.add('hidden');
+        document.getElementById('tutorial-screen').classList.remove('hidden');
+    }
+
+    // --- DADOS DO JOGO ---
     const components = {
         mobo: [
-            { id: 'm1', name: 'Gigabyte H510M', socket: 'LGA1200', ramType: 'DDR4', price: 500, icon: '🎛️', desc: 'Placa-mãe de entrada para Intel.' },
-            { id: 'm2', name: 'Asus B550', socket: 'AM4', ramType: 'DDR4', price: 700, icon: '🎛️', desc: 'Placa-mãe robusta para processadores AMD.' },
-            { id: 'm3', name: 'Asus B85m', socket: 'LGA1150', ramType: 'DDR3', price: 300, icon: '🎛️', desc: 'Placa-mãe antiga para Intel'}
+            { id: 'm1', name: 'Gigabyte H510M', socket: 'LGA1200', ramType: 'DDR4', price: 500, icon: '🎛️', desc: 'Placa Intel Básica.' },
+            { id: 'm2', name: 'Asus B550', socket: 'AM4', ramType: 'DDR4', price: 700, icon: '🎛️', desc: 'Placa AMD Intermediária.' },
+            { id: 'm3', name: 'Placa Mae TGT H61-T', socket: 'LGA1150', ramType: 'DDR3', price: 300, icon: '🎛️', desc: 'Placa Intel Básica.' }
         ],
         cpu: [
-            { id: 'c1', name: 'Intel Core i5 10400F', socket: 'LGA1200', power: 65, integratedGpu: false, icon: '🧠', desc: 'Processador Intel bom custo-benefício. Precisa de soquete LGA1200.' },
-            { id: 'c2', name: 'AMD Ryzen 5 5600X', socket: 'AM4', power: 65, integratedGpu: false, icon: '🧠', desc: 'Processador AMD rápido para jogos. Precisa de soquete AM4.' },
-            {id: 'c1', name: 'Core i7 4770', socket: 'LGA1150', power: 84, integratedGpu: true, icon: '🧠', desc: 'Produto de alto desempenho de antiga geração'}
+            { id: 'c1', name: 'Intel i5 10400F', socket: 'LGA1200', power: 65, icon: '🧠', desc: 'Intel. Requer soquete LGA1200.' },
+            { id: 'c2', name: 'AMD Ryzen 5 5600X', socket: 'AM4', power: 65, icon: '🧠', desc: 'AMD. Requer soquete AM4.' },
+            { id: 'c3', name: 'Intel Core i5-3470', socket: 'LGA1155', power: 77, icon: '🧠', desc: 'Intel. Requer soquete LGA1155.' }
         ],
         ram: [
-            { id: 'r1', name: '8GB DDR4 2666MHz', type: 'DDR4', power: 5, icon: '💾', desc: 'Memória padrão DDR4.' },
-            { id: 'r2', name: '8GB DDR3 Antiga', type: 'DDR3', power: 5, icon: '💾', desc: 'Memória antiga, incompatível com placas modernas.' }
+            { id: 'r1', name: '8GB DDR4', type: 'DDR4', power: 5, icon: '💾', desc: 'Padrão atual DDR4.' },
+            { id: 'r2', name: '4GB DDR3 (Antiga)', type: 'DDR3', power: 5, icon: '💾', desc: 'Padrão antigo DDR3.' }
         ],
         gpu: [
-            { id: 'g1', name: 'GTX 1650', power: 75, icon: '📺', desc: 'Placa de vídeo básica.' },
-            { id: 'g2', name: 'RTX 3060', power: 170, icon: '📺', desc: 'Placa de vídeo potente, exige boa fonte.' }
+            { id: 'g1', name: 'GTX 1650', power: 75, icon: '📺', desc: 'Básica, baixo consumo.' },
+            { id: 'g2', name: 'RTX 3060', power: 170, icon: '📺', desc: 'Potente, alto consumo.' }
         ],
         storage: [
-            { id: 's1', name: 'SSD 480GB SATA', power: 5, icon: '💿', desc: 'Armazenamento rápido.' }
+            { id: 's1', name: 'SSD 480GB', power: 5, icon: '💿', desc: 'Rápido e silencioso.' }
         ],
         psu: [
-            { id: 'p1', name: 'Fonte 400W', wattage: 400, icon: '⚡', desc: 'Fonte básica para computadores de escritório.' },
-            { id: 'p2', name: 'Fonte 600W', wattage: 600, icon: '⚡', desc: 'Fonte ideal para PCs gamer.' }
+            { id: 'p1', name: 'Fonte 400W', wattage: 400, icon: '⚡', desc: 'Para PCs simples.' },
+            { id: 'p2', name: 'Fonte 600W', wattage: 600, icon: '⚡', desc: 'Para PCs Gamer.' }
         ]
     };
 
-    // --- ESTADO DO JOGO ---
-    let currentBuild = {
-        mobo: null,
-        cpu: null,
-        ram: null,
-        gpu: null,
-        storage: null,
-        psu: null
-    };
-
+    let currentBuild = { mobo: null, cpu: null, ram: null, gpu: null, storage: null, psu: null };
     let activeCategory = 'mobo';
 
-    // --- FUNÇÕES DE INICIALIZAÇÃO E RENDERIZAÇÃO ---
+    // --- INICIALIZAÇÃO ---
     function init() {
         renderTabs();
         renderParts('mobo');
     }
 
     function renderTabs() {
-        const categories = {
-            mobo: 'Placa-Mãe',
-            cpu: 'Processador',
-            ram: 'Memória',
-            gpu: 'Vídeo',
-            storage: 'Disco',
-            psu: 'Fonte'
-        };
+        const categories = { mobo: 'Placa-Mãe', cpu: 'CPU', ram: 'RAM', gpu: 'Vídeo', storage: 'Disco', psu: 'Fonte' };
         const container = document.getElementById('categoryTabs');
         container.innerHTML = '';
         
@@ -349,15 +341,16 @@
         const info = document.getElementById('infoPanel');
         list.innerHTML = '';
         
-        // Texto educativo da categoria
+        // Dicas rápidas ingame
         let eduText = "";
         switch(category) {
-            case 'cpu': eduText = "O Cérebro do PC. Realiza os cálculos. Verifique o SOQUETE!"; break;
-            case 'mobo': eduText = "A espinha dorsal. Conecta tudo. Define qual CPU e RAM você pode usar."; break;
-            case 'psu': eduText = "A energia. Deve ter potência (Watts) suficiente para alimentar a GPU e CPU."; break;
-            default: eduText = "Escolha um componente compatível com sua placa-mãe.";
+            case 'cpu': eduText = "Verifique se o soquete combina com a Placa-Mãe!"; break;
+            case 'mobo': eduText = "Comece por aqui. Ela dita as regras do resto."; break;
+            case 'ram': eduText = "Verifique se é DDR3 ou DDR4."; break;
+            case 'psu': eduText = "Calcule o total de Watts das outras peças."; break;
+            default: eduText = "Escolha com sabedoria.";
         }
-        info.innerText = eduText;
+        info.innerText = `Dica: ${eduText}`;
         info.style.display = 'block';
 
         components[category].forEach(part => {
@@ -375,69 +368,44 @@
         });
     }
 
-    // --- LÓGICA DO JOGO ---
-
     function selectPart(category, part) {
         currentBuild[category] = part;
-        updateSlot(category, part);
-    }
-
-    function updateSlot(category, part) {
         const slot = document.getElementById(`slot-${category}`);
         slot.classList.add('filled');
-        slot.innerHTML = `
-            <span style="font-size:1.5rem">${part.icon}</span>
-            <div>${part.name}</div>
-            <small style="color:#eee; display:block; margin-top:2px;">(Clique para remover)</small>
-        `;
+        slot.innerHTML = `<span style="font-size:1.5rem">${part.icon}</span><div>${part.name}</div>`;
     }
 
     function removePart(category) {
         currentBuild[category] = null;
         const slot = document.getElementById(`slot-${category}`);
         slot.classList.remove('filled');
-        const labels = {
-            mobo: 'Placa-Mãe', cpu: 'CPU', ram: 'RAM', gpu: 'Vídeo', storage: 'Armazenamento', psu: 'Fonte'
-        };
+        const labels = { mobo: 'Placa-Mãe', cpu: 'CPU', ram: 'RAM', gpu: 'Vídeo', storage: 'Armazenamento', psu: 'Fonte' };
         slot.innerText = labels[category];
     }
 
     function validateBuild() {
         const build = currentBuild;
         let errors = [];
-        let totalPower = 0;
-
-        // 1. Verificar se tudo está montado
+        
+        // Verificação Básica
         for (let key in build) {
             if (!build[key]) {
-                showModal('⚠️', 'Computador Incompleto', `Você esqueceu de selecionar: ${key.toUpperCase()}`);
+                showModal('⚠️', 'Faltam Peças!', `Você esqueceu de montar: ${key.toUpperCase()}`);
                 return;
             }
         }
 
-        // 2. Compatibilidade Placa-mãe vs CPU (Soquete)
-        if (build.mobo.socket !== build.cpu.socket) {
-            errors.push(`Soquete Incompatível: A placa-mãe é ${build.mobo.socket} mas o processador é ${build.cpu.socket}.`);
-        }
-
-        // 3. Compatibilidade Placa-mãe vs RAM (Tipo)
-        if (build.mobo.ramType !== build.ram.type) {
-            errors.push(`Memória Incompatível: A placa-mãe aceita ${build.mobo.ramType}, você escolheu ${build.ram.type}.`);
-        }
-
-        // 4. Cálculo de Energia (PSU)
-        // Estimativa simples: CPU + GPU + 50W sobra
-        totalPower = build.cpu.power + build.gpu.power + build.ram.power + build.storage.power + 50; // Margem de segurança
+        // Lógica de Compatibilidade
+        if (build.mobo.socket !== build.cpu.socket) errors.push(`❌ <strong>Processador errado:</strong> A placa é ${build.mobo.socket}, o CPU é ${build.cpu.socket}.`);
+        if (build.mobo.ramType !== build.ram.type) errors.push(`❌ <strong>Memória errada:</strong> A placa pede ${build.mobo.ramType}, você pôs ${build.ram.type}.`);
         
-        if (build.psu.wattage < totalPower) {
-            errors.push(`Falta de Energia: Seu sistema consome aprox. ${totalPower}W, mas a fonte é só de ${build.psu.wattage}W. O PC vai desligar!`);
-        }
+        let totalPower = build.cpu.power + build.gpu.power + build.ram.power + build.storage.power + 50;
+        if (build.psu.wattage < totalPower) errors.push(`❌ <strong>Fonte Fraca:</strong> O PC gasta ${totalPower}W, a fonte só tem ${build.psu.wattage}W.`);
 
-        // Resultado Final
         if (errors.length > 0) {
-            showModal('💥', 'A montagem falhou!', errors.join('<br><br>'));
+            showModal('💥', 'Erro na Montagem', errors.join('<br><br>'));
         } else {
-            showModal('🚀', 'Sucesso!', `Computador montado corretamente!<br>Consumo estimado: ${totalPower}W.<br>Sistema Operacional iniciando...`);
+            showModal('🚀', 'PC Ligado!', `Parabéns! Sistema estável.<br>Consumo total: ${totalPower}W.`);
         }
     }
 
@@ -452,9 +420,7 @@
         document.getElementById('feedbackModal').style.display = 'none';
     }
 
-    // Iniciar jogo
     init();
-
 </script>
 </body>
 </html>
